@@ -1,7 +1,7 @@
 var capture;
 
 var buff;
-var lineNum = 8;
+var lineNum = 9;
 var linesColor = [];
 
 var linesXPos = [];
@@ -14,7 +14,7 @@ var polySynth;
 var startPosition;
 
 var noteListWhole = [
-"C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "G#4", "A4", "A#4",
+"C#4", "D#4", "E4", "F#4", "G#4", "A#4", "B4", "C#5", "D#5", "A#4",
 "B4", "C5", "D5", "C5", "F#5", "E5", "A#5", "G#5", "C6", "D6"
 ];
 
@@ -34,11 +34,11 @@ function setup() {
 
     createCanvas(canvasWidth, canvasHeight);
 
-    let reverb = new Tone.JCReverb(0.4).connect(Tone.Master);
-    let delay = new Tone.FeedbackDelay(0.1);
+    let reverb = new Tone.JCReverb(0.3).connect(Tone.Master);
+    let delay = new Tone.FeedbackDelay(0);
 
     polySynth = new Tone.PolySynth(6, Tone.Synth);
-    let vol = new Tone.Volume(-15);
+    let vol = new Tone.Volume(-10);
     // polySynth.chain(delay, reverb);
     polySynth.chain(vol, reverb).chain(vol, delay).chain(vol, Tone.Master);
 
@@ -72,8 +72,10 @@ function setup() {
 
 function draw() {
 
+  var initializeTime = 3000;
+
   if (!oldSumInitialized){
-    setTimeout(initColorCapture, 2000);
+    setTimeout(initColorCapture, initializeTime);
   }
   else{
       trigger();
@@ -116,13 +118,12 @@ var buffImageUpdate = function(_capture){
 
 function lineColorCapture(){
     for (let i = 0; i < lineNum; i++) {
-        //let _index = (i) * capture.width / lineNum;
+
         y = startPosition-22;
-        x = - (i/lineNum) * capture.height;
+        x = - (i*0.88/lineNum) * capture.height;
         let offset = (y*capture.width) + x;
-        //console.log(_index);
-        //let offset = ((_y*width)+_x)*4
-        linesColor[i] = [capture.pixels[offset*8 - 4], capture.pixels[offset*8 - 3], capture.pixels[offset*8 - 2], 255];
+
+        linesColor[i] = [capture.pixels[offset*9 - 4], capture.pixels[offset*9 - 3], capture.pixels[offset*9 - 2], 255];
     }
 }
 
@@ -130,11 +131,10 @@ function initColorCapture(){
     for (let i = 0; i < lineNum; i++) {
         //let _index = (i) * capture.width / lineNum;
         y = startPosition-22;
-        x = - (i/lineNum) * capture.height;
+        x = - (i*0.88/lineNum) * capture.height;
         let offset = (y*capture.width) + x;
-        //console.log(_index);
-        //let offset = ((_y*width)+_x)*4
-        linesColor[i] = [capture.pixels[offset*8 - 4], capture.pixels[offset*8 - 3], capture.pixels[offset*8 - 2], 255];
+
+        linesColor[i] = [capture.pixels[offset*9 - 4], capture.pixels[offset*9 - 3], capture.pixels[offset*9 - 2], 255];
         linesOldSum[i] = (linesColor[i][0] + linesColor[i][1] + linesColor[i][2]) / 3.0;
     }
 
@@ -159,13 +159,14 @@ function pathLineDraw(){
 
 function trigger(){
 
+    var colorThreshold = 40;
     var threshold = 8;
     var speed = 1;
 
     for (let i = 0; i < linesColor.length; i++) {
         let _colorValueSum = (linesColor[i][0] + linesColor[i][1] + linesColor[i][2]) / 3.0;
         let _diffColorValue = abs(_colorValueSum - linesOldSum[i]);
-        if (_diffColorValue > 50 && linesTrigger[i] == true) {
+        if (_diffColorValue > colorThreshold && linesTrigger[i] == true) {
             linesTrigger[i] = false;
             //linesOldSum[i] = _colorValueSum;
 
